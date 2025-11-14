@@ -1,28 +1,41 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
+import Header from './components/Header'
+import NavBar from './components/NavBar'
+import HomePage from './components/HomePage'
+import OrdersPage from './components/OrdersPage'
+import { Routes, Route, useLocation } from 'react-router-dom'
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  const [cart, setCart] = useState([])
+  const location = useLocation()
+  const payBadge = 3 // example badge for Pay Bill
+
+  function addToCart(item) {
+    setCart(prev => {
+      const idx = prev.findIndex(p => p.name === item.name)
+      if (idx >= 0) {
+        const copy = [...prev]
+        copy[idx] = { ...copy[idx], quantity: copy[idx].quantity + 1 }
+        return copy
+      }
+      return [...prev, { ...item, quantity: 1 }]
+    })
+  }
+
+  const showBack = location.pathname !== '/'
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center">
-      <div className="bg-white p-8 rounded-lg shadow-lg">
-        <h1 className="text-3xl font-bold text-gray-800 mb-4">
-          Vibe Coding Platform
-        </h1>
-        <p className="text-gray-600 mb-6">
-          Your AI-powered development environment
-        </p>
-        <div className="text-center">
-          <button
-            onClick={() => setCount(count + 1)}
-            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded"
-          >
-            Count is {count}
-          </button>
-        </div>
-      </div>
+    <div className="min-h-screen bg-gray-50">
+      <Header tableId="T-03" showBack={showBack} />
+      <main className="pt-2 pb-20">
+        <Routes>
+          <Route path="/" element={<HomePage onAdd={addToCart} />} />
+          <Route path="/orders" element={<OrdersPage cart={cart} setCart={setCart} tableId="T-03" />} />
+          <Route path="/menu" element={<HomePage onAdd={addToCart} />} />
+          <Route path="/pay" element={<div className="max-w-md mx-auto p-4">Payment coming soon</div>} />
+        </Routes>
+      </main>
+      <NavBar payBadge={payBadge} />
     </div>
   )
 }
-
-export default App
